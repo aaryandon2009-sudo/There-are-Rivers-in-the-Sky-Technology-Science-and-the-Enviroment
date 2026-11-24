@@ -1,0 +1,154 @@
+<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover"><title>The River Tribunal</title><meta name="color-scheme" content="dark">
+<style>
+:root{--navy:#101D2B;--char:#17232D;--blue:#397C99;--ivory:#F2F0E9;--gold:#B49A65;--grey:#AAB5BE;color-scheme:dark}
+*{box-sizing:border-box;margin:0}html,body{height:100%;background:var(--navy);color:var(--ivory);font-family:"Helvetica Neue",Arial,sans-serif;overflow:hidden}
+h1,h2,h3,.serif{font-family:Georgia,"Times New Roman",serif;font-weight:400}
+#cv{position:fixed;inset:0;display:block;touch-action:none}
+button{font:inherit;color:inherit;cursor:pointer}button:focus-visible,textarea:focus-visible{outline:2px solid var(--gold);outline-offset:2px}
+.btn{background:var(--gold);color:var(--navy);border:0;padding:12px 22px;font-weight:600;font-size:16px}.btn.g{background:none;color:var(--ivory);border:1px solid var(--grey);font-weight:400}
+#hud{position:fixed;top:calc(12px + env(safe-area-inset-top,0px));left:14px;right:14px;display:flex;gap:10px;align-items:center;pointer-events:none}#hud>*{pointer-events:auto}
+.pill{background:#101D2Bdd;border:1px solid #AAB5BE55;padding:8px 14px;font-size:14px;color:var(--grey)}.pill b{color:var(--gold)}
+#hn{position:fixed;left:50%;bottom:calc(26px + env(safe-area-inset-bottom,0px));transform:translateX(-50%);background:#101D2Bee;border:1px solid var(--gold);padding:10px 18px;font-size:15px;display:none}
+.ov{position:fixed;inset:0;display:none;align-items:center;justify-content:center;background:#101D2Bcc;padding:3vh 3vw;z-index:5}.ov.on{display:flex}
+.card{background:var(--char);border:1px solid #397C9990;border-top:3px solid var(--gold);max-width:780px;width:100%;max-height:92vh;overflow:auto;padding:clamp(18px,2.4vw,34px);display:flex;flex-direction:column;gap:12px}
+.card h2{font-size:clamp(24px,3vw,40px)}.card p{font-size:clamp(15px,1.5vw,20px);line-height:1.55;color:#dde2e6}.tag{font-size:13px;color:var(--gold);letter-spacing:.04em}
+.card label{font-size:14px;color:var(--grey);line-height:1.4}.card textarea{width:100%;min-height:76px;background:var(--navy);color:var(--ivory);border:1px solid #AAB5BE66;padding:10px;font:16px/1.5 "Helvetica Neue",Arial,sans-serif;resize:vertical}
+.row{display:flex;gap:10px;flex-wrap:wrap}.card img{width:100%;max-height:200px;object-fit:cover}
+.q{font-family:Georgia,serif;font-size:clamp(19px,2.2vw,30px);line-height:1.35;border-left:3px solid var(--gold);padding-left:16px}
+.intro h1{font-size:clamp(38px,7vw,88px);letter-spacing:.05em;line-height:1}
+.opt{display:flex;gap:10px;align-items:flex-start;padding:10px;border:1px solid #AAB5BE55;cursor:pointer;font-size:15px;line-height:1.4}.opt input{margin-top:4px}.opt.s{border-color:var(--gold)}
+.fi{padding:8px 0;border-bottom:1px solid #AAB5BE33;font-size:15px;line-height:1.45}.fi i{color:var(--gold);font-style:normal}
+.thesis{font-family:Georgia,serif;font-style:italic;color:var(--gold);font-size:clamp(20px,2.4vw,34px)}
+#bn{position:fixed;top:16%;left:50%;transform:translateX(-50%);text-align:center;pointer-events:none;opacity:0;z-index:4;width:90%}#bn.on{animation:bnr 4.2s ease forwards}#bn h2{font-size:clamp(30px,5vw,64px)}#bn p{color:var(--grey);font-size:clamp(14px,1.6vw,22px);margin-top:6px}@keyframes bnr{0%{opacity:0;transform:translate(-50%,10px)}15%,75%{opacity:1;transform:translate(-50%,0)}100%{opacity:0}}
+</style></head><body><canvas id="cv"></canvas><input type="file" id="fi" accept="image/*" hidden>
+<div id="hud"><div class="pill" id="pg"></div><div class="pill" id="zn"></div><button class="pill" onclick="showCase()">Case file (C)</button><button class="pill" onclick="openI()">Help</button></div>
+<div id="hn"></div><div id="bn"></div><div class="ov on" id="pn"></div>
+<script>
+const Q='What ethical, ecological and political consequences arise from humanity’s attempts to control waterways and exploit natural resources?';
+const yT=x=>470+Math.sin(x/380)*60,yG=x=>1330+Math.sin(x/420+1)*60,HT=56,hG=x=>x<2300?56:x<2900?56+(x-2300)/600*70:26;
+const POI=[
+{id:'e1',t:'e',x:430,y:yT(430)-105,h:'Expansion without sanitation',tn:'growth vs sanitation',b:'Rapid urban expansion and inadequate sanitation contributed to severe water contamination in nineteenth-century London.',p:'So what? What does this suggest about building a city without understanding its effect on water?'},
+{id:'e2',t:'e',x:700,y:yT(700)+105,h:'John Snow and the 1854 cholera outbreak',tn:'scientific knowledge vs ignorance',b:'John Snow’s investigation of the 1854 cholera outbreak demonstrated the importance of scientific evidence in understanding contaminated water.',p:'So what? What does this show about the link between knowledge and responsibility?'},
+{id:'e3',t:'e',x:1000,y:yT(1000)-105,h:'Bazalgette and the Great Stink, 1858',tn:'technology as correction',b:'Joseph Bazalgette’s sewer engineering transformed London’s sanitation infrastructure following the Great Stink of 1858.',p:'So what? Technology caused and then corrected a problem here. What does that complicate?'},
+{id:'q1',t:'q',x:850,y:yT(850)+105,h:'Text station: Victorian London',fo:'Focus: scientific knowledge and ignorance; water as essential to human survival; human development and environmental responsibility.',w:'the Victorian London storyline'},
+{id:'e7',t:'e',x:2100,y:yT(2100)-105,h:'A river declared biologically dead',tn:'industrial harm vs recovery',ck:1,b:'In 1957 the Natural History Museum reported that the tidal Thames through London was biologically dead. Since then, sewage treatment and regulation have allowed fish and other wildlife to return.',p:'So what? What does a river’s recovery show about responsibility, and about how long harm takes to undo?'},
+{id:'e8',t:'e',x:2420,y:yT(2420)+105,h:'The Tideway Tunnel',tn:'old infrastructure vs modern demands',ck:1,b:'The Thames Tideway Tunnel is a major sewer built beneath London to reduce the sewage that overflows into the river in heavy rain, because the nineteenth-century system could no longer cope.',p:'So what? What does it suggest that solutions to one century’s problem must be rebuilt in another?'},
+{id:'q3',t:'q',x:2780,y:yT(2780)+105,h:'Text station: London today',fo:'Focus: scientific knowledge applied to water in the present; how earlier decisions about rivers shape later lives; responsibility across time.',w:'Zaleekhah’s storyline'},
+{id:'e5',t:'e',x:2600,y:yG(2600)-145,h:'Hasankeyf and displacement',tn:'economic development vs cultural heritage',b:'Communities were displaced and parts of the historic settlement of Hasankeyf were flooded.',p:'So what? What is lost when heritage is treated as an obstacle to development?'},
+{id:'q2',t:'q',x:1500,y:yG(1500)+105,h:'Text station: the Tigris',fo:'Focus: the river as continuity, memory and life; juxtaposition of technological progress and cultural loss; political power and natural resources; development imposed on vulnerable communities. Look for where water is treated as pure or precious, and where it is contaminated or controlled.',w:'Narin’s storyline'},
+{id:'e9',t:'e',x:700,y:yG(700)-105,h:'Nineveh and the Tigris',tn:'ancient heritage vs modern power',ck:1,b:'Nineveh, an Assyrian capital on the Tigris near present-day Mosul, held the royal library of Ashurbanipal. Clay tablets recovered there in the nineteenth century, including a version of the Epic of Gilgamesh, were brought to the British Museum in London.',p:'So what? What does it mean that the Tigris carried memory and story long before it carried a dam, and that some of those stories ended up in London?'},
+{id:'e4',t:'e',x:2250,y:yG(2250)+105,h:'Intended benefits of the Ilisu Dam',tn:'development vs preservation',b:'The Ilisu Dam project on the Tigris in southeastern Turkey was designed to generate hydroelectricity and support water management and economic development.',p:'So what? Whose needs does this kind of project serve, and whose voices are missing?'},
+{id:'e6',t:'e',x:3040,y:yG(3040)+95,h:'Ecology, downstream water and politics',tn:'national sovereignty vs shared water',b:'Concerns include ecological disruption, downstream water availability and the political implications of controlling a river that crosses borders.',p:'So what? Can one state’s decision about a river ever be only its own?'}];
+const STR={a:['e1','e2','e3','q1'],z:['e7','e8','q3'],g:['e9','e5','q2','e4','e6']};
+const HALL={x:1600,y:900};
+const CONN=['Both show humanity trying to manage and control water.','Both show that technological decisions have consequences beyond their immediate objectives.','Both show that technological benefits and environmental costs are not necessarily shared equally.','Across time, the two rivers move in opposite directions: one recovers, one is increasingly burdened. Neither outcome was inevitable.'];
+const CONC='Shafak does not reject technological advancement. She challenges the assumption that the ability to manipulate nature gives humanity unlimited authority to do so. The Thames and Tigris show that interventions must be judged not only by their immediate benefits but by long-term ecological consequences and their effects on communities, cultural heritage and political relationships.';
+const VER=[['Acquitted','Technological progress is essential to human advancement.'],['Guilty','Humanity’s exploitation of waterways has caused unacceptable harm.'],['Conditional','Technology is necessary, but its use must be governed by ethical and ecological responsibility.']];
+const $=i=>document.getElementById(i),esc=s=>String(s).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
+let N={},T={c:['','','',''],r:0,v:-1,a:'',s:0};
+POI.forEach(p=>N[p.id]={so:'',quote:'',tech:'',eff:'',link:''});
+try{const d=JSON.parse(localStorage.getItem('rt2')||'{}');if(d.N)for(const k in d.N)if(N[k])Object.assign(N[k],d.N[k]);if(d.T)Object.assign(T,d.T);if(!Array.isArray(T.c)||T.c.length<4)T.c=['','','','']}catch(e){}
+const IMG={};try{POI.forEach(p=>{const v=localStorage.getItem('rti-'+p.id);if(v)IMG[p.id]=v})}catch(e){}
+function save(){try{localStorage.setItem('rt2',JSON.stringify({N,T}))}catch(e){}}
+const ok=p=>{const n=N[p.id];return p.t==='e'?n.so.trim().length>=15:n.quote.trim().length>=5&&(n.tech.trim().length>2||n.eff.trim().length>2)};
+const sc=k=>POI.filter(p=>STR[k].includes(p.id)&&ok(p)).length;
+const unlocked=()=>sc('a')>=1&&sc('z')>=1&&sc('g')>=1&&POI.filter(ok).length>=5;
+function upd(){$('pg').innerHTML='Stations analysed <b>'+POI.filter(ok).length+'/'+POI.length+'</b>'}
+function sn(id,f,v){N[id][f]=v;save();upd()}
+let sd=7;const rnd=()=>(sd=sd*16807%2147483647)/2147483647;
+const BL=[];for(let x=80;x<1300;x+=105){BL.push([x,150+rnd()*40,80,110+rnd()*50,1,0]);BL.push([x+30,yT(x)+175,80,90+rnd()*50,0,0])}
+for(let x=1950;x<3150;x+=120){BL.push([x,90+rnd()*40,70,160+rnd()*100,1,1]);BL.push([x+20,yT(x)+175,70,90+rnd()*70,0,1])}
+const SCR=[];for(let i=0;i<240;i++){const x=rnd()*3200,y=1120+rnd()*620;if(Math.abs(y-yG(x))>hG(x)+45&&!(x>330&&x<1080&&y<1280))SCR.push([x,y,3+rnd()*5])}
+const cv=$('cv'),g=cv.getContext('2d');let W,H;
+function rs(){W=cv.width=innerWidth;H=cv.height=innerHeight}addEventListener('resize',rs);rs();
+let px=1600,py=1010,tx=null,ty=null,keys={},last=0,near=null,face=0;
+function water(x,y){return Math.abs(y-yT(x))<HT||Math.abs(y-yG(x))<hG(x)}
+function frame(t){const dt=Math.min(.05,(t-last)/1000);last=t;
+if(!document.querySelector('.ov.on')){let dx=(keys.ArrowRight||keys.d?1:0)-(keys.ArrowLeft||keys.a?1:0),dy=(keys.ArrowDown||keys.s?1:0)-(keys.ArrowUp||keys.w?1:0);
+if(dx||dy)tx=null;else if(tx!=null){const ex=tx-px,ey=ty-py,d=Math.hypot(ex,ey);if(d<8)tx=null;else{dx=ex/d;dy=ey/d}}
+if(dx||dy){const l=Math.hypot(dx,dy),sp=250*(water(px,py)?.45:1)*dt,ox=px;px+=dx/l*sp;py+=dy/l*sp;face=Math.atan2(dy,dx);
+if(ox<2890&&px>=2890&&Math.abs(py-yG(2890))<hG(2890)+50)px=2889;px=Math.max(40,Math.min(3160,px));py=Math.max(60,Math.min(1740,py))}}
+draw(t);zoneTick();near=null;let bd=95;for(const p of POI){const d=Math.hypot(p.x-px,p.y-py);if(d<bd){bd=d;near=p}}
+if(!near&&Math.hypot(HALL.x-px,HALL.y-py)<110)near={hall:1};
+const h=$('hn');if(near&&!document.querySelector('.ov.on')){h.style.display='block';h.textContent=near.hall?'Press E to approach the tribunal':'Press E to '+(near.t==='q'?'analyse the text':'examine the evidence')}else h.style.display='none';
+requestAnimationFrame(frame)}
+function poly(pts){g.beginPath();pts.forEach((q,i)=>i?g.lineTo(q[0],q[1]):g.moveTo(q[0],q[1]));g.fill()}
+function river(yf,hf,st,x0,x1,t){const wg=g.createLinearGradient(0,0,3200,0);st.forEach(s=>wg.addColorStop(s[0],s[1]));g.fillStyle=wg;g.globalAlpha=.93;g.beginPath();const a=Math.floor(x0/30)*30;for(let x=a;x<=x1;x+=30)x===a?g.moveTo(x,yf(x)-hf(x)):g.lineTo(x,yf(x)-hf(x));for(let x=Math.floor(x1/30)*30;x>=a;x-=30)g.lineTo(x,yf(x)+hf(x));g.fill();g.globalAlpha=1;
+g.strokeStyle='#F2F0E91f';g.lineWidth=2;g.setLineDash([18,28]);g.lineDashOffset=-t/22;for(let k=-2;k<=2;k++){g.beginPath();for(let x=a;x<=x1;x+=30){const y=yf(x)+k*hf(x)/3;x===a?g.moveTo(x,y):g.lineTo(x,y)}g.stroke()}g.setLineDash([])}
+function draw(t){const cx=Math.max(0,Math.min(3200-W,px-W/2)),cy=Math.max(0,Math.min(1800-H,py-H/2));
+g.setTransform(1,0,0,1,0,0);g.fillStyle='#101D2B';g.fillRect(0,0,W,H);g.translate(-cx,-cy);
+const gg=g.createLinearGradient(0,0,0,1800);gg.addColorStop(0,'#131e28');gg.addColorStop(.36,'#16222c');gg.addColorStop(.5,'#17232D');gg.addColorStop(.62,'#221f1b');gg.addColorStop(.78,'#2a251e');gg.addColorStop(1,'#352b20');g.fillStyle=gg;g.fillRect(cx-4,cy-4,W+8,H+8);
+const x0=cx-40,x1=cx+W+40;
+g.strokeStyle='#B49A6544';g.lineWidth=2;g.setLineDash([10,12]);g.beginPath();g.moveTo(HALL.x,HALL.y-110);g.lineTo(HALL.x,yT(HALL.x)+HT+8);g.moveTo(HALL.x,HALL.y+10);g.lineTo(HALL.x,yG(HALL.x)-hG(HALL.x)-8);g.stroke();g.setLineDash([]);
+for(const b of BL){const m=b[5];g.fillStyle=m?'#13222e':'#0d1823';g.fillRect(b[0],b[1],b[2],b[3]);for(let i=0;i<6;i++){g.fillStyle=m?((i*5+b[0])%3?'#6fb3d144':'#9fd2e6'):((i*7+b[0])%3?'#B49A6544':'#B49A65');g.fillRect(b[0]+10+(i%3)*(m?18:22),b[1]+14+Math.floor(i/3)*30,8,12)}
+if(!m&&b[4])for(let i=0;i<3;i++){const k=((t/50+i*40+b[0])%120)/120;g.fillStyle='rgba(170,181,190,'+(.22*(1-k))+')';g.beginPath();g.arc(b[0]+20+i*18+k*25,b[1]-k*110,6+k*16,0,7);g.fill()}}
+for(let x=80;x<3200;x+=150){const m=x>1900;if(x>1300&&!m)continue;for(const s of[-1,1]){const y=yT(x)+s*(HT+32);const c=m?'111,179,209':'180,154,101';const r=g.createRadialGradient(x,y,2,x,y,34);r.addColorStop(0,'rgba('+c+',.55)');r.addColorStop(1,'rgba('+c+',0)');g.fillStyle=r;g.fillRect(x-34,y-34,68,68);g.fillStyle=m?'#cfe9f2':'#B49A65';g.fillRect(x-2,y-2,4,4)}}
+const py0=yT(1090)+HT;g.fillStyle='#10202b';g.fillRect(1090,py0+35,90,60);g.fillRect(1150,py0-45,16,90);
+for(let i=0;i<4;i++){const x=300+i*110;g.fillStyle='#2a2f2c';g.fillRect(x-8,yT(x)+HT,16,22)}
+g.strokeStyle='#6fb3d1';g.lineWidth=3;g.beginPath();g.arc(2420,yT(2420)+HT+60,34,0,7);g.stroke();g.beginPath();g.moveTo(2470,yT(2420)+HT+60);g.lineTo(2470,yT(2420)+HT-20);g.lineTo(2520,yT(2420)+HT-20);g.stroke();
+g.fillStyle='#4d4234';poly([[330,1270],[420,1190],[560,1150],[800,1140],[960,1175],[1060,1270]]);
+g.fillStyle='#6a5b48';g.fillRect(380,1160,620,26);for(let i=0;i<20;i++)g.fillRect(380+i*32,1148,18,14);g.fillRect(610,1090,46,96);g.fillRect(720,1090,46,96);
+g.fillStyle='#0d1823';g.beginPath();g.arc(688,1186,30,Math.PI,0);g.fill();for(let i=0;i<5;i++)g.fillRect(430+i*110,1168,14,16);g.fillStyle='#8a7858';g.fillRect(662,1150,10,36);g.fillRect(704,1150,10,36);
+g.fillStyle='#4d4234';for(let i=0;i<6;i++)g.fillRect(1450+i*60,yG(1450+i*60)-110-(i%2)*14,34,26);
+g.fillStyle='#41372a';g.beginPath();for(let x=2920;x<=3200;x+=30)x===2920?g.moveTo(x,yG(x)-hG(x)-34):g.lineTo(x,yG(x)-hG(x)-34);for(let x=3200;x>=2920;x-=30)g.lineTo(x,yG(x)+hG(x)+34);g.fill();
+g.fillStyle='#55603f';for(const s of SCR)g.fillRect(s[0],s[1],s[2],s[2]);
+river(yT,()=>HT,[[0,'#6a5a3c'],[.42,'#6a5a3c'],[.52,'#58705f'],[.64,'#3a86a3'],[1,'#3f9bb0']],x0,x1,t);
+river(yG,hG,[[0,'#3a86a3'],[.46,'#3a8f98'],[.66,'#4d7a6a'],[.78,'#6a6038'],[1,'#46391f']],x0,x1,t);
+g.strokeStyle='#4a5b68';g.lineWidth=7;for(const s of[-1,1]){g.beginPath();for(let x=60;x<=1300;x+=30){const y=yT(x)+s*HT;x===60?g.moveTo(x,y):g.lineTo(x,y)}g.stroke()}
+g.strokeStyle='#5b8497';g.lineWidth=5;for(const s of[-1,1]){g.beginPath();for(let x=1950;x<=3150;x+=30){const y=yT(x)+s*HT;x===1950?g.moveTo(x,y):g.lineTo(x,y)}g.stroke()}
+for(let i=0;i<4;i++){const x=300+i*110,y=yT(x)+HT,k=(t/1400+i*.27)%1;g.fillStyle='rgba(120,95,50,'+(.5*(1-k))+')';g.beginPath();g.ellipse(x,y-6-k*30,10+k*26,5+k*9,0,0,7);g.fill()}
+for(let i=0;i<3;i++){const x=120+((t/45+i*380)%1100),y=yT(x)+(i-1)*18;g.fillStyle='#0d1823';g.fillRect(x-26,y-8,52,16);g.fillStyle='#B49A65';g.fillRect(x+16,y-3,5,5)}
+for(let i=0;i<7;i++){const x=((i*230+t/35)%1500)-100,y=yT(x)+Math.sin(i*2)*40;g.fillStyle='rgba(200,205,210,.07)';g.beginPath();g.ellipse(x,y,150,34,0,0,7);g.fill()}
+for(let i=0;i<9;i++){const x=1950+((t/55+i*130)%1200),y=yT(x)+(i%3-1)*18;g.fillStyle='rgba(225,238,244,.55)';g.beginPath();g.ellipse(x,y,6,2.2,0,0,7);g.fill()}
+g.font='italic 17px Georgia';g.fillStyle='#d2a56acc';g.textAlign='center';g.fillText('Flooded Hasankeyf',2600,yG(2600)-hG(2600)-8);
+g.fillStyle='rgba(77,66,52,.5)';for(let i=0;i<8;i++){const x=2380+i*60;g.fillRect(x,yG(x)-24+(i%2)*10,40,26)}
+for(let i=0;i<16;i++){const x=2400+i*45,y=yG(x)+Math.sin(i*3)*hG(x)*.6;g.fillStyle='rgba(45,38,20,.32)';g.beginPath();g.ellipse(x+Math.sin(t/2000+i)*10,y,24,6,0,0,7);g.fill()}
+g.fillStyle='#6b7a86';g.fillRect(2882,yG(2890)-hG(2890)-50,34,2*hG(2890)+100);g.fillStyle='#B49A65';g.fillRect(2894,yG(2890)-hG(2890)-50,10,10);
+g.strokeStyle='#8a97a1';g.lineWidth=2;for(let i=0;i<3;i++){const x=2960+i*100,y=1180;g.beginPath();g.moveTo(x,y);g.lineTo(x+8,y-60);g.lineTo(x+16,y);g.moveTo(x-6,y-48);g.lineTo(x+22,y-48);g.stroke();if(i){g.strokeStyle='#8a97a177';g.beginPath();g.moveTo(x-92,y-60);g.lineTo(x+8,y-60);g.stroke();g.strokeStyle='#8a97a1'}}
+g.fillStyle='#0d1823';g.fillRect(HALL.x-120,HALL.y-110,240,120);g.strokeStyle='#B49A65';g.lineWidth=1;g.strokeRect(HALL.x-120,HALL.y-110,240,120);for(let i=0;i<5;i++)g.fillRect(HALL.x-100+i*50,HALL.y-100,10,100);
+g.fillStyle=unlocked()?'#B49A65':'#3a4b58';g.fillRect(HALL.x-18,HALL.y-40,36,50);
+g.textAlign='center';g.fillStyle='#F2F0E9';g.font='italic 18px Georgia';g.fillText('The Tribunal',HALL.x,HALL.y-124);
+g.font='italic 40px Georgia';g.fillStyle='#8a7a5a99';g.fillText('Victorian London, 1850s',680,70);g.fillStyle='#6fb3d199';g.fillText('London today',2550,50);g.fillStyle='#d2a56a99';g.fillText('Ancient Nineveh',800,1560);g.fillStyle='#a07a4a99';g.fillText('The Ilisu Dam',2800,1560);
+g.font='italic 24px Georgia';g.fillStyle='#B49A65bb';g.fillText('The Thames: from filth to recovery',HALL.x,yT(HALL.x)-HT-40);g.fillText('The Tigris: from clarity to contamination',HALL.x,yG(HALL.x)+hG(HALL.x)+60);
+g.font='16px Georgia';g.fillStyle='#AAB5BE';g.fillText('River Thames',640,yT(640)+5);g.fillText('River Thames',2550,yT(2550)+5);g.fillText('River Tigris',1250,yG(1250)+5);g.fillText('Ilisu Dam',2899,yG(2890)-hG(2890)-64);
+for(const p of POI){const d=ok(p),pu=1+Math.sin(t/300+p.x)*.15,c=p.t==='q'?'#6fb3d1':'#B49A65';g.save();g.translate(p.x,p.y);g.rotate(Math.PI/4);g.scale(pu,pu);g.fillStyle=d?c:'#101D2B';g.strokeStyle=c;g.lineWidth=3;g.fillRect(-12,-12,24,24);g.strokeRect(-12,-12,24,24);if(d){g.fillStyle='#101D2B';g.fillRect(-5,-5,10,10)}g.restore();
+if(Math.hypot(p.x-px,p.y-py)<320){g.fillStyle='#F2F0E9';g.font='15px Helvetica,Arial';g.textAlign='center';g.fillText(p.h,p.x,p.y-26)}}
+g.fillStyle='#00000055';g.beginPath();g.ellipse(px,py+10,12,5,0,0,7);g.fill();g.fillStyle='#F2F0E9';g.beginPath();g.arc(px,py,11,0,7);g.fill();g.strokeStyle='#B49A65';g.lineWidth=3;g.stroke();g.fillStyle='#B49A65';g.beginPath();g.arc(px+Math.cos(face)*7,py+Math.sin(face)*7,3.5,0,7);g.fill();
+g.setTransform(1,0,0,1,0,0);const tg=g.createLinearGradient(0,-cy,0,1800-cy);tg.addColorStop(0,'rgba(120,118,105,.14)');tg.addColorStop(.4,'rgba(0,0,0,0)');tg.addColorStop(.6,'rgba(0,0,0,0)');tg.addColorStop(1,'rgba(210,150,70,.12)');g.fillStyle=tg;g.fillRect(0,0,W,H);
+const mw=180,mh=101,mx=14,my=H-mh-14,k=mw/3200;g.fillStyle='#101D2Bdd';g.fillRect(mx,my,mw,mh);g.fillStyle='rgba(120,130,140,.22)';g.fillRect(mx,my,mw,mh*.36);g.fillStyle='rgba(185,138,78,.3)';g.fillRect(mx,my+mh*.64,mw,mh*.36);g.strokeStyle='#AAB5BE66';g.lineWidth=1;g.strokeRect(mx,my,mw,mh);
+const m1=g.createLinearGradient(mx,0,mx+mw,0);m1.addColorStop(0,'#8a7348');m1.addColorStop(.42,'#8a7348');m1.addColorStop(.64,'#4aa0bd');m1.addColorStop(1,'#4aa0bd');const m2=g.createLinearGradient(mx,0,mx+mw,0);m2.addColorStop(0,'#4aa0bd');m2.addColorStop(.5,'#4aa0bd');m2.addColorStop(.78,'#8a7348');m2.addColorStop(1,'#5a4a30');
+for(const[f,m]of[[yT,m1],[yG,m2]]){g.strokeStyle=m;g.lineWidth=3;g.beginPath();for(let x=0;x<=3200;x+=100){const X=mx+x*k,Y=my+f(x)*k;x?g.lineTo(X,Y):g.moveTo(X,Y)}g.stroke()}
+for(const p of POI){g.fillStyle=ok(p)?'#F2F0E9':p.t==='q'?'#6fb3d1':'#B49A65';g.fillRect(mx+p.x*k-2,my+p.y*k-2,4,4)}g.strokeStyle='#B49A65';g.strokeRect(mx+HALL.x*k-4,my+HALL.y*k-4,8,6);g.fillStyle='#F2F0E9';g.beginPath();g.arc(mx+px*k,my+py*k,3,0,7);g.fill()}
+const ZN={nl:['Victorian London','The Thames, 1850s. A city outgrows its water, and the river runs thick with waste.','#a8956a'],nm:['The Thames, between eras','Engineering, science and regulation begin to change the river.','#8aa08e'],nr:['London today','A cleaner river, and new questions about responsibility across time.','#6fb3d1'],c:['The Tribunal Commons','Between the two rivers. Compare, then judge.','#B49A65'],sl:['Ancient Nineveh','The Tigris runs clear past an ancient Assyrian capital.','#d2a56a'],sm:['Development moves in','The river darkens as the project approaches.','#a88a58'],sr:['The Ilisu Dam','Water held back, Hasankeyf flooded, the downstream left with less.','#a07a4a']};
+let zc='',pend=0;
+function zoneTick(){const e=px<1300?'l':px<1900?'m':'r',z=py<720?'n'+e:py<1130?'c':'s'+e;if(z!==zc){zc=z;pend=1;const d=ZN[z];$('zn').innerHTML='<b>'+d[0]+'</b>';$('zn').style.borderLeft='4px solid '+d[2]}
+if(pend&&!document.querySelector('.ov.on')){pend=0;const d=ZN[zc],b=$('bn');b.innerHTML='<div class="tag" style="color:'+d[2]+'">Entering</div><h2>'+d[0]+'</h2><p>'+d[1]+'</p>';b.className='';void b.offsetWidth;b.className='on'}}
+/* panels */
+function showP(h){const p=$('pn');p.innerHTML='<div class="card" role="dialog">'+h+'</div>';p.classList.add('on')}
+function closeP(){$('pn').classList.remove('on');$('pn').innerHTML='';keys={}}
+function openI(){showP('<div class="intro"><div class="tag">An inquiry in text and river</div><h1>THE RIVER TRIBUNAL</h1><p class="serif" style="font-size:22px;color:#AAB5BE">Humanity, Technology and the Cost of Control.</p></div><div class="q">'+Q+'</div><p>Two rivers run side by side. Follow the <b>Thames</b> (top) through Victorian London to London today, and the <b>Tigris</b> (bottom) from ancient Nineveh to the dam. Watch what happens to each river along the way. Walk with <b>WASD</b> or the arrow keys, or click where you want to go, and press <b>E</b> beside a marker. Gold diamonds hold external research; blue diamonds are text stations where you analyse Shafak’s novel, one for each of the three storylines. The Tribunal sits between the rivers. Everything you write goes into your case file. You set the pace.</p><div class="row"><button class="btn" onclick="closeP()">Enter the inquiry</button></div>')}
+function photo(id){return IMG[id]?'<img alt="" src="'+IMG[id]+'">':''}
+function openPoi(p){const n=N[p.id];let h;
+if(p.t==='e')h='<div class="tag">External research · tension: '+p.tn+'</div><h2>'+p.h+'</h2>'+photo(p.id)+'<p>'+p.b+'</p>'+(p.ck?'<div class="tag">Verify the details against your own source before citing.</div>':'')+'<label for="f0">'+p.p+'</label><textarea id="f0" oninput="sn(\''+p.id+'\',\'so\',this.value)">'+esc(n.so)+'</textarea>';
+else h='<div class="tag">From the novel · '+p.w+'</div><h2>'+p.h+'</h2>'+photo(p.id)+'<p>'+p.fo+' Choose a passage from your own copy that speaks to this focus, then analyse it.</p>'+[['quote','Quotation and page number (copied from your book)'],['tech','Shafak’s literary choice: name the technique and where you see it'],['eff','Effect on the reader'],['link','Link to the central question: what does this passage say about control, consequence or responsibility?']].map(f=>'<label>'+f[1]+'<textarea oninput="sn(\''+p.id+'\',\''+f[0]+'\',this.value)">'+esc(n[f[0]])+'</textarea></label>').join('');
+showP(h+'<div class="row"><button class="btn" onclick="closeP()">Back to the river</button><button class="btn g" onclick="pickPh(\''+p.id+'\')">Add photo</button></div>')}
+let phT=null;function pickPh(id){phT=id;$('fi').click()}
+$('fi').onchange=e=>{const f=e.target.files[0];if(!f||!phT)return;const id=phT,r=new FileReader();r.onload=()=>{const im=new Image();im.onload=()=>{const k=Math.min(1,1200/im.width),c=document.createElement('canvas');c.width=im.width*k;c.height=im.height*k;c.getContext('2d').drawImage(im,0,0,c.width,c.height);IMG[id]=c.toDataURL('image/jpeg',.7);try{localStorage.setItem('rti-'+id,IMG[id])}catch(x){}openPoi(POI.find(p=>p.id===id))};im.src=r.result};r.readAsDataURL(f);e.target.value=''};
+function compile(){let s='THE RIVER TRIBUNAL: MY CASE FILE\n\n'+Q+'\n';POI.forEach(p=>{const n=N[p.id];s+='\n['+p.h+']\n'+(p.t==='e'?n.so:'Quote: '+n.quote+'\nTechnique: '+n.tech+'\nEffect: '+n.eff+'\nLink: '+n.link)+'\n'});
+s+='\n[Cross-examination]\n'+T.c.join('\n')+'\n\n[My verdict] '+(T.v>=0?VER[T.v][0]:'')+'\n'+T.a;return s}
+function showCase(){showP('<h2>Your case file</h2><p>Stations analysed: '+POI.filter(ok).length+'/'+POI.length+'. The Tribunal opens when you have analysed at least five, including at least one from each storyline: Victorian London, London today and the Tigris.</p>'+POI.map(p=>{const n=N[p.id];return '<div class="fi"><i>'+(ok(p)?'✓ ':'· ')+p.h+'</i><br>'+(ok(p)?esc(p.t==='e'?n.so:n.quote):'Not yet analysed')+'</div>'}).join('')+'<div class="row"><button class="btn" onclick="closeP()">Back to the river</button></div>')}
+function tri(){const s=T.s;let h;
+if(s===0)h='<div class="tag">The Tribunal · the question</div><div class="q">'+Q+'</div><p>These are your own claims so far:</p>'+POI.filter(ok).map(p=>'<div class="fi"><i>'+p.h+'</i><br>'+esc(p.t==='e'?N[p.id].so:N[p.id].link||N[p.id].quote)+'</div>').join('')+'<div class="row"><button class="btn" onclick="T.s=1;tri()">Cross-examine the rivers</button><button class="btn g" onclick="closeP()">Keep exploring</button></div>';
+else if(s===1)h='<div class="tag">The cross-examination</div><div class="q">What connects the Thames (then and now) and the Tigris, despite their different contexts?</div>'+['How does each case show people trying to manage or control water?','What consequences went beyond the original aim?','Who received the benefits, and who bore the costs?','The Thames moves from filth towards recovery; the Tigris from clarity towards contamination. What does that opposition suggest?'].map((q,i)=>'<label>'+q+'<textarea oninput="T.c['+i+']=this.value;save()">'+esc(T.c[i])+'</textarea></label>').join('')+(T.r?'<div class="fi"><i>The tribunal’s reading</i></div>'+CONN.map(c=>'<p>'+c+'</p>').join('')+'<div class="thesis">Technological advancement is not synonymous with ethical progress.</div>':'')+'<div class="row">'+(T.r?'<button class="btn" onclick="T.s=2;tri()">Deliver your verdict</button>':'<button class="btn" onclick="T.r=1;save();tri()">Compare with the tribunal’s reading</button>')+'<button class="btn g" onclick="T.s=0;tri()">Back</button></div>';
+else if(s===2)h='<div class="tag">Your verdict</div><div class="q">Can technological advancement justify the ethical, ecological and political consequences of controlling natural resources?</div>'+VER.map((v,i)=>'<label class="opt'+(T.v===i?' s':'')+'"><input type="radio" name="vd" '+(T.v===i?'checked ':'')+'onchange="T.v='+i+';save();tri()"><span><b>'+v[0]+':</b> '+v[1]+'</span></label>').join('')+'<label>Now answer the central question in your own words, using examples from at least two of the three storylines. Try: “Shafak suggests that…”, “This is evident when…”, “However…”<textarea style="min-height:140px" oninput="T.a=this.value;save()">'+esc(T.a)+'</textarea></label><div class="row">'+(T.v>=0?'<button class="btn" onclick="T.s=3;tri()">Hear the conclusion</button>':'')+'<button class="btn g" onclick="T.s=1;tri()">Back</button></div>';
+else h='<div class="tag">The conclusion</div><p>'+CONC+'</p><div class="thesis">If we have the power to control nature, does that mean we have the right?</div><p>Compare this with your own verdict. Where do you agree, and what would you add?</p><label>Your full case file (select all and copy it into your notes)<textarea readonly style="min-height:160px" onfocus="this.select()">'+esc(compile())+'</textarea></label><div class="row"><button class="btn g" onclick="T.s=2;tri()">Back</button><button class="btn" onclick="closeP()">Return to the river</button></div>';
+showP(h)}
+function act(){if(!near||document.querySelector('.ov.on'))return;if(near.hall){unlocked()?tri():showP('<h2>The doors are sealed</h2><p>Analyse at least five stations, with at least one from Victorian London, one from London today and one from the Tigris. You have '+POI.filter(ok).length+' (Victorian London '+sc('a')+', London today '+sc('z')+', Tigris '+sc('g')+').</p><div class="row"><button class="btn" onclick="closeP()">Back to the river</button></div>')}else openPoi(near)}
+addEventListener('keydown',e=>{const tg=e.target.tagName;if(tg==='TEXTAREA'||tg==='INPUT'){if(e.key==='Escape')closeP();return}
+const k=e.key.length===1?e.key.toLowerCase():e.key;if(k==='Escape'){closeP();return}if(document.querySelector('.ov.on'))return;
+if(k==='e'||k==='Enter'||k===' '){e.preventDefault();act()}else if(k==='c')showCase();else if(['ArrowUp','ArrowDown','ArrowLeft','ArrowRight','w','a','s','d'].includes(k)){e.preventDefault();keys[k]=1}});
+addEventListener('keyup',e=>{const k=e.key.length===1?e.key.toLowerCase():e.key;delete keys[k]});
+cv.addEventListener('pointerdown',e=>{if(document.querySelector('.ov.on'))return;const cx=Math.max(0,Math.min(3200-W,px-W/2)),cy=Math.max(0,Math.min(1800-H,py-H/2));tx=e.clientX+cx;ty=e.clientY+cy;
+const p=POI.find(p=>Math.hypot(p.x-tx,p.y-ty)<24);if(p){tx=p.x;ty=p.y+40}});
+upd();openI();requestAnimationFrame(frame);
+</script></body></html>
